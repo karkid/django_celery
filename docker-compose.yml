@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
 
   redis:
@@ -11,7 +9,9 @@ services:
       context: ./dcelery
     command: python manage.py runserver 0.0.0.0:8000
     volumes: 
-      - ./dcelery:/user/src/app/
+      - type: bind
+        source: ./dcelery
+        target: /usr/src/app/
     ports:
       - 8001:8000
     environment:
@@ -25,11 +25,15 @@ services:
     container_name: celery
     build: 
       context: ./dcelery
-    volumes:
-      - ./dcelery:/usr/src/app
+    command: celery --app=dcelery worker -l INFO
+    volumes: 
+      - type: bind
+        source: ./dcelery
+        target: /usr/src/app/
     environment:
       - DEBUG=1
       - SECRET_KEY=09090909098890098908
       - ALLOWED_HOSTS=localhost,127.0.0.1
     depends_on:
       - redis
+      - django
